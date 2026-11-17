@@ -51,8 +51,11 @@ Testów nie ma. Weryfikacją jest `fmt` + `validate` + `plan`.
 
 ## Architektura
 
-- Płaski root module, bez podmodułów i bez zdalnego backendu (stan lokalny). Zasoby są podzielone na pliki
-  tematyczne: `network.tf`, `security.tf` (`random_string.suffix`), `monitoring.tf` (action group; alert
+- Płaski root module, bez podmodułów i bez zdalnego backendu. `terraform.tfstate` **jest w gicie**: `cd.yaml`
+  commituje go po każdym apply (także nieudanym). Lokalny `apply` i CD dzielą więc ten sam plik stanu. Przed
+  pracą zrób `git pull`, a lokalne zmiany stanu commituj, bo inaczej stan rozjedzie się z Azure.
+- Zasoby są podzielone na pliki tematyczne: `network.tf` (sama prywatna strefa DNS, bez VNetu),
+  `security.tf` (`random_string.suffix`), `monitoring.tf` (action group; alert
   na usunięcie RG to zadanie dla kursantów), `main.tf` (`data` RG + output). Zmienne są w `variables.tf`, a `alert_email` w `monitoring.tf`.
 - Pliki `*.disabled` (`vm.tf.disabled`, `storage.tf.disabled`) to gotowe, wyłączone przykłady ćwiczeń
   (VM nginx `Standard_B1s`, storage account). Terraform je ignoruje. Włączasz je przez usunięcie
@@ -69,7 +72,8 @@ Testów nie ma. Weryfikacją jest `fmt` + `validate` + `plan`.
   robi `fmt` + `validate` po edycji `.tf` (wymaga `jq` i wcześniejszego `terraform init`).
 - `/plan-review` uruchamia `terraform plan` i przekazuje wynik subagentowi `tf-reviewer` (tylko odczyt).
 - CI: `ci.yaml` (fmt + validate oraz job `trivy config` dla HIGH/CRITICAL, na razie tylko raportujący, na PR/push do `main`). `cd.yaml` uruchamiany ręcznie (plan, potem apply
-  za zatwierdzeniem w środowisku `production`).
-- `INSTRUKCJE.md` to instrukcja dla kursanta (setup, zasady, typowe błędy). Przy zmianie zasad demo aktualizuj
-  ją razem z tym plikiem i z `.claude/agents/tf-reviewer.md` (ten dopuszcza więcej rozmiarów VM niż `Standard_B1s`
+  za zatwierdzeniem w środowisku `production`). `codex-review.yaml` na każdym PR do `main` (tylko z tego repo, nie z forków)
+  robi review przez Codex i komentuje PR. Jako źródło zasad czyta **ten plik**, więc zmiany w CLAUDE.md zmieniają też tę recenzję.
+- `INSTRUKCJE.md` to instrukcja dla kursanta (setup, zasady, typowe błędy), a `README.md` to krótki przegląd repo.
+  Przy zmianie zasad demo aktualizuj je razem z tym plikiem i z `.claude/agents/tf-reviewer.md` (ten dopuszcza więcej rozmiarów VM niż `Standard_B1s`
   i nie wymienia Front Door/CDN).
