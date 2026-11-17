@@ -37,3 +37,4 @@ terraform apply                       # bez -auto-approve
 - Region tylko z `var.location`, tagi z grupy zasobów.
 - Część usług (Firewall, Bastion, AKS, Cosmos DB, …) blokuje polityka. Pełna lista jest w [INSTRUKCJE.md](INSTRUKCJE.md).
 - Nie commituj plików `.env` ani `*.tfvars`. `terraform.tfstate` jest w repo, bo commituje go job CD.
+
